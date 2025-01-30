@@ -2,53 +2,105 @@ import datetime
 import pytest
 from app.main import outdated_products
 from unittest import mock
+from typing import Any
 
 
 @pytest.mark.parametrize(
-    "products,mock_today_date,result",
+    "product_list, today_date, expected_output",
     [
-        ([{"name": "salmon",
-           "expiration_date": datetime.date(2024, 12, 31),
-           "price": 600.0}],
-         datetime.date(2025, 1, 3),
-         ["salmon"]),
-        ([{"name": "chicken",
-           "expiration_date": datetime.date(2025, 1, 30),
-           "price": 120.0}],
-         datetime.date(2025, 1, 3),
-         []),
-        ([{"name": "duck",
-           "expiration_date": datetime.date(2025, 2, 3),
-           "price": 160.0}],
-         datetime.date(2025, 2, 3),
-         []),
-        ([{"name": "tuna",
-           "expiration_date": datetime.date(2024, 12, 31),
-           "price": 95.0}],
-         datetime.date(2025, 1, 3),
-         ["tuna"]),
-        ([{"name": "beef",
-           "expiration_date": datetime.date(2025, 1, 30),
-           "price": 200.0},
-          {"name": "pork",
-           "expiration_date": datetime.date(2025, 2, 3),
-           "price": 150.0},
-          {"name": "crab",
-           "expiration_date": datetime.date(2024, 2, 28),
-           "price": 650.0},
-          {"name": "horse",
-           "expiration_date": datetime.date(2020, 7, 30),
-           "price": 950.0}],
-         datetime.date(2025, 1, 3),
-         ["crab", "horse"]),
+        pytest.param(
+            [
+                {
+                    "name": "salmon",
+                    "expiration_date": datetime.date(2024, 12, 21),
+                    "price": 600.0
+                }
+            ],
+            datetime.date(2024, 12, 22),
+            ["salmon"],
+            id="Check for 1 outdated product"
+        ),
+        pytest.param(
+            [
+                {
+                    "name": "chicken",
+                    "expiration_date": datetime.date(2022, 2, 5),
+                    "price": 120.0
+                },
+                {
+                    "name": "beef",
+                    "expiration_date": datetime.date(2022, 2, 1),
+                    "price": 120.0
+                }
+            ],
+            datetime.date(2024, 12, 22),
+            ["chicken", "beef"],
+            id="Check for 2 outdated product"
+        ),
+        pytest.param(
+            [
+                {
+                    "name": "chicken",
+                    "expiration_date": datetime.date(2022, 2, 5),
+                    "price": 120.0
+                },
+                {
+                    "name": "beef",
+                    "expiration_date": datetime.date(2022, 2, 1),
+                    "price": 120.0
+                },
+                {
+                    "name": "duck",
+                    "expiration_date": datetime.date(2022, 2, 2),
+                    "price": 160.0
+                }
+            ],
+            datetime.date(2024, 12, 22),
+            ["chicken", "beef", "duck"],
+            id="Check for 3 outdated product"
+        ),
+        pytest.param(
+            [
+                {
+                    "name": "chicken",
+                    "expiration_date": datetime.date(2024, 12, 23),
+                    "price": 120.0
+                },
+                {
+                    "name": "beef",
+                    "expiration_date": datetime.date(2024, 12, 23),
+                    "price": 120.0
+                },
+                {
+                    "name": "duck",
+                    "expiration_date": datetime.date(2024, 12, 23),
+                    "price": 160.0
+                }
+            ],
+            datetime.date(2024, 12, 22),
+            [],
+            id="Check for no outdated products"
+        ),
+        pytest.param(
+            [
+                {
+                    "name": "salmon",
+                    "expiration_date": datetime.date(2024, 12, 22),
+                    "price": 600
+                },
+            ],
+            datetime.date(2024, 12, 22),
+            [],
+            id="today's date is not expired"
+        ),
     ],
 )
-@mock.patch("app.main.datetime")
+@mock.patch("datetime.date")
 def test_outdated_products(
-    mock_today: datetime.date,
-    products: list[dict],
-    mock_today_date: datetime.date,
-    result: list[str]
+    mocked_date: Any,
+    product_list: Any,
+    today_date: Any,
+    expected_output: Any
 ) -> None:
-    mock_today.date.today.return_value = mock_today_date
-    assert outdated_products(products) == result
+    mocked_date.today.return_value = today_date
+    assert outdated_products(product_list) == expected_output
