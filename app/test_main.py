@@ -20,7 +20,7 @@ from unittest import mock
         ([{"name": "duck",
            "expiration_date": datetime.date(2025, 2, 3),
            "price": 160.0}],
-         datetime.date(2025, 1, 3),
+         datetime.date(2025, 2, 3),
          []),
         ([{"name": "tuna",
            "expiration_date": datetime.date(2024, 12, 31),
